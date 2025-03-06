@@ -2,7 +2,7 @@
   "private": true,
   "scripts": {
     "build": "nitro build",
-    "dev": "nitro dev",
+    "dev": "NITRO_PRESET=bun nitropack dev --host --https --https.cert ../fullchain.pem --https.key ../localhost+1-key.pem",
     "prepare": "nitro prepare",
     "preview": "node .output/server/index.mjs"
   },
