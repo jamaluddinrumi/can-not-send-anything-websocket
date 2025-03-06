@@ -1,9 +1,25 @@
-import { Database } from "bun:sqlite";
+import { defineWebSocketHandler } from "#imports";
 
-export default defineEventHandler((event) => {
-  const db = new Database(":memory:");
-  const query = db.query("select 'Hello world' as message;");
-  
-
-  return query.get(); // => { message: "Hello world" }
+export default defineWebSocketHandler({
+  open(peer) {
+    peer.send({ user: "server", message: `Welcome ${peer}!` });
+    peer.publish("chat", { user: "server", message: `${peer} joined!` });
+    peer.subscribe("chat");
+  },
+  message(peer, message) {
+    if (message.text().includes("ping")) {
+      peer.send({ user: "server", message: "pong" });
+    } else {
+      const msg = {
+        user: peer.toString(),
+        message: message.toString(),
+      };
+      peer.send(msg); // echo
+      peer.publish("chat", msg);
+    }
+  },
+  close(peer) {
+    peer.publish("chat", { user: "server", message: `${peer} left!` });
+  },
 });
+
